@@ -6,7 +6,7 @@ const filtersDiv = document.querySelector(".filters");
 
 // Fonction pour afficher les travaux
 function afficherTravaux(travaux) {
-   gallery.innerHTML = "";
+   gallery.innerHTML = ""; // on vide la galerie supprime tout le contenu HTML qu’il y a à l’intérieur de <div class="gallery">
 
   travaux.forEach((work) => {
     const figure = document.createElement("figure");
