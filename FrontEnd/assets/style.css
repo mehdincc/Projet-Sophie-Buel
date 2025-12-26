@@ -102,6 +102,9 @@ header,
 hgroup,
 menu,
 nav,
+html {
+  scroll-behavior: smooth;
+}
 section {
   display: block;
 }
@@ -170,24 +173,23 @@ nav ul {
   align-items: center;
   list-style-type: none;
 }
-nav li {
-  padding: 0 10px;
-  font-size: 1.2em;
-}
 
 nav li {
   padding: 0 10px;
   font-size: 1.2em;
 }
 
-nav li a {
-  color: inherit;
+/* Style des liens (login / logout) */
+nav a {
   text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 nav li:hover {
   color: #b1663c;
 }
+
 #introduction {
   display: flex;
   align-items: center;
@@ -356,4 +358,27 @@ footer nav ul {
   text-align: center;
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* Bandeau mode édition */
+.edit-mode {
+  width: 100%;
+  height: 59px;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-mode img {
+  width: 16px;
+  height: 16px;
+}
+
+.edit-mode p {
+  color: white;
+  font-family: "Work Sans";
+  font-size: 16px;
+  font-weight: 400;
 }

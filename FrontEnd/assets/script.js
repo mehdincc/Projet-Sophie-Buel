@@ -1,12 +1,57 @@
 console.log("JS chargé");
 
-// Récupération des éléments HTML
+/* =====================================================
+   RÉCUPÉRATION DES ÉLÉMENTS HTML
+===================================================== */
+
+// Galerie des projets (page d’accueil)
 const gallery = document.querySelector(".gallery");
+
+// Zone des filtres
 const filtersDiv = document.querySelector(".filters");
 
-// Fonction pour afficher les travaux
+
+/* =====================================================
+   ÉTAPE 5.3 — VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
+===================================================== */
+
+
+// On vérifie si un token existe dans le navigateur
+const token = localStorage.getItem("token");
+
+if (token) {
+  console.log("Utilisateur connecté");
+
+  // Quand on est connecté :
+  // 1. On cache les filtres
+  if (filtersDiv) {
+    filtersDiv.style.display = "none";
+  }
+
+  // 2. Le bouton "login" devient "logout"
+  const loginLi = document.querySelector("nav li:nth-child(3)");
+
+  if (loginLi) {
+    loginLi.textContent = "logout";
+
+    loginLi.addEventListener("click", () => {
+      // Déconnexion
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+
+      // Retour à la page login
+      window.location.href = "login.html";
+    });
+  }
+}
+
+/* =====================================================
+   FONCTION : AFFICHER LES TRAVAUX
+===================================================== */
+
 function afficherTravaux(travaux) {
-   gallery.innerHTML = ""; // on vide la galerie supprime tout le contenu HTML qu’il y a à l’intérieur de <div class="gallery">
+  // On vide la galerie avant d’afficher autre chose
+  gallery.innerHTML = "";
 
   travaux.forEach((work) => {
     const figure = document.createElement("figure");
@@ -24,14 +69,21 @@ function afficherTravaux(travaux) {
   });
 }
 
-// Mettre le bouton cliqué en actif
+/* =====================================================
+   FONCTION : METTRE LE BOUTON ACTIF
+===================================================== */
+
 function setActiveButton(buttonClique) {
   const buttons = document.querySelectorAll(".filters button");
+
   buttons.forEach((btn) => btn.classList.remove("active"));
   buttonClique.classList.add("active");
 }
 
-// Récupération des travaux
+/* =====================================================
+   RÉCUPÉRATION DES TRAVAUX (PAGE D’ACCUEIL)
+===================================================== */
+
 fetch("http://localhost:5678/api/works")
   .then((response) => response.json())
   .then((works) => {
@@ -40,7 +92,10 @@ fetch("http://localhost:5678/api/works")
     // Affichage de tous les projets au chargement
     afficherTravaux(works);
 
-    // Récupération des catégories
+    /* -----------------------------------------------
+       RÉCUPÉRATION DES CATÉGORIES
+    ----------------------------------------------- */
+
     fetch("http://localhost:5678/api/categories")
       .then((response) => response.json())
       .then((categories) => {
@@ -57,7 +112,7 @@ fetch("http://localhost:5678/api/works")
           afficherTravaux(works);
         });
 
-        // Boutons catégories
+        // Boutons des catégories
         categories.forEach((category) => {
           const btn = document.createElement("button");
           btn.textContent = category.name;
@@ -66,6 +121,7 @@ fetch("http://localhost:5678/api/works")
           btn.addEventListener("click", () => {
             setActiveButton(btn);
 
+            // On filtre les travaux selon la catégorie
             const travauxFiltres = works.filter(
               (work) => work.categoryId === category.id
             );
@@ -74,10 +130,13 @@ fetch("http://localhost:5678/api/works")
           });
         });
       });
-  })
-  
-// login
-  const form = document.querySelector("#login-form");
+  });
+
+/* =====================================================
+   PAGE LOGIN — AUTHENTIFICATION
+===================================================== */
+
+const form = document.querySelector("#login-form");
 
 if (form) {
   form.addEventListener("submit", (event) => {
@@ -89,16 +148,20 @@ if (form) {
     fetch("http://localhost:5678/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password }),
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
     })
       .then((response) => response.json())
       .then((data) => {
-        // si token présent => login OK
+        // Si le token existe → connexion réussie
         if (data.token) {
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.userId);
 
-          window.location.href = "index.html"; // redirection accueil
+          // Redirection vers l’accueil
+          window.location.href = "index.html";
         } else {
           document.querySelector("#login-error").textContent =
             "Erreur : email ou mot de passe incorrect.";
