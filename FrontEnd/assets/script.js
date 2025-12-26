@@ -75,3 +75,38 @@ fetch("http://localhost:5678/api/works")
         });
       });
   })
+  
+// login
+  const form = document.querySelector("#login-form");
+
+if (form) {
+  form.addEventListener("submit", (event) => {
+    event.preventDefault(); // empêche le rechargement de la page
+
+    const email = document.querySelector("#email").value;
+    const password = document.querySelector("#password").value;
+
+    fetch("http://localhost:5678/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // si token présent => login OK
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("userId", data.userId);
+
+          window.location.href = "index.html"; // redirection accueil
+        } else {
+          document.querySelector("#login-error").textContent =
+            "Erreur : email ou mot de passe incorrect.";
+        }
+      })
+      .catch(() => {
+        document.querySelector("#login-error").textContent =
+          "Erreur serveur. Réessaie.";
+      });
+  });
+}
