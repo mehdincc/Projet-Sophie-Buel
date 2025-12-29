@@ -13,11 +13,14 @@
     <meta name="description" content="" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
+
   <body>
+    <!-- Bandeau mode édition (affiché en JS quand connecté) -->
     <div class="edit-mode">
       <img src="./assets/icons/Vector.svg" alt="éditer" />
       <p>Mode édition</p>
     </div>
+
     <header>
       <h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
       <nav>
@@ -29,6 +32,7 @@
         </ul>
       </nav>
     </header>
+
     <main>
       <section id="introduction">
         <figure>
@@ -53,20 +57,21 @@
           </p>
         </article>
       </section>
-      <section id="portfolio">
-        <div class="portfolio-header">
-          <h2>Mes Projets</h2>
 
-          <!-- Bouton modifier (caché par défaut, affiché si connecté) -->
-          <a href="#" class="edit-projects">
+      <section id="portfolio">
+        <div class="projects-header">
+          <h2>Mes projets</h2>
+
+          <div class="edit-projects">
             <img src="./assets/icons/Vector.svg" alt="modifier" />
-            <span>Modifier</span>
-          </a>
+            <span>modifier</span>
+          </div>
         </div>
 
         <div class="filters"></div>
         <div class="gallery"></div>
       </section>
+
       <section id="contact">
         <h2>Contact</h2>
         <p>Vous avez un projet ? Discutons-en !</p>
@@ -89,6 +94,44 @@
         </ul>
       </nav>
     </footer>
+
+    <!-- Overlay + Modale (cachés par défaut) -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal">
+        <!-- Croix -->
+        <button
+          class="modal-close"
+          id="modal-close"
+          aria-label="Fermer la modale"
+        >
+          ×
+        </button>
+
+        <!-- Vue 1 : Galerie -->
+        <div class="modal-view" id="modal-gallery-view">
+          <h3 class="modal-title">Galerie photo</h3>
+
+          <div class="modal-gallery" id="modal-gallery">
+            <!-- Ici on mettra les miniatures plus tard -->
+          </div>
+
+          <button class="modal-add-btn" id="modal-add-btn">
+            Ajouter une photo
+          </button>
+        </div>
+
+        <!-- Vue 2 : Formulaire -->
+        <div class="modal-view modal-hidden" id="modal-form-view">
+          <button class="modal-back" id="modal-back" aria-label="Retour">
+            ←
+          </button>
+
+          <h3 class="modal-title">Ajout photo</h3>
+
+          <p>Ici on mettra le formulaire plus tard.</p>
+        </div>
+      </div>
+    </div>
 
     <script src="./assets/script.js"></script>
   </body>

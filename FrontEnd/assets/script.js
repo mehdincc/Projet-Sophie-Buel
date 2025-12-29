@@ -211,3 +211,46 @@ if (form) {
       });
   });
 }
+// ===== MODALE : ouverture / fermeture =====
+const modalOverlay = document.querySelector("#modal-overlay");
+const modal = document.querySelector("#modal");
+const modalClose = document.querySelector("#modal-close");
+
+// Le bouton "modifier" (adapte le sélecteur si besoin)
+const editBtn = document.querySelector("#edit-btn"); // idéal : mettre cet id dans ton HTML
+
+function openModal() {
+  if (!modalOverlay) return;
+  modalOverlay.style.display = "flex";
+}
+
+function closeModal() {
+  if (!modalOverlay) return;
+  modalOverlay.style.display = "none";
+}
+
+// Ouvrir au clic sur "modifier" (uniquement si connecté)
+if (isConnected && editBtn) {
+  editBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    openModal();
+  });
+}
+
+// Fermer avec la croix
+if (modalClose) {
+  modalClose.addEventListener("click", closeModal);
+}
+
+// Fermer en cliquant sur l'overlay (mais pas quand on clique dans la modale)
+if (modalOverlay) {
+  modalOverlay.addEventListener("click", () => {
+    closeModal();
+  });
+}
+
+if (modal) {
+  modal.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+}

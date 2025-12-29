@@ -384,24 +384,13 @@ footer nav ul {
 }
 
 /* Bouton modifier les projets */
-
 /* Conteneur titre + modifier */
-.portfolio-header {
+.projects-header {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 30px; /* espace entre "Mes Projets" et le groupe Modifier */
-  position: relative;
-  margin-top: 130px;
-}
-
-/* ===== Mode édition : titre Mes projets + bouton Modifier ===== */
-
-.title-edit {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  align-items: baseline;
   gap: 30px; /* espace entre "Mes projets" et le groupe modifier */
+  margin-bottom: 50px; /* remplace l’espace des filtres quand cachés */
 }
 
 /* Groupe crayon + texte */
@@ -413,17 +402,32 @@ footer nav ul {
   font-weight: 400;
   font-size: 14px;
   color: #000;
-  text-decoration: none;
   cursor: pointer;
+  text-decoration: none;
+}
+
+/* Empêche le soulignement + garde la couleur même si c’est un lien un jour */
+.edit-projects,
+.edit-projects span {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Icône crayon */
 .edit-projects img {
   width: 16px;
   height: 16px;
-  filter: brightness(0); /* force l’icône en noir */
+  filter: brightness(0); /* noir */
 }
 
-a.edit-projects {
-  margin-bottom: 2em;
+/* Modale (cachée par défaut) */
+
+.modal-overlay {
+  display: none;
+}
+.modal-overlay.is-open {
+  display: flex;
+}
+.modal-hidden {
+  display: none;
 }
