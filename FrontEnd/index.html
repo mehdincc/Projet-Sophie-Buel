@@ -15,7 +15,7 @@
   </head>
   <body>
     <div class="edit-mode">
-      <img src="./assets/icons/Vector.svg" alt="modifier" />
+      <img src="./assets/icons/Vector.svg" alt="éditer" />
       <p>Mode édition</p>
     </div>
     <header>
@@ -24,7 +24,7 @@
         <ul>
           <li><a href="#portfolio">projets</a></li>
           <li><a href="mailto:sophie.bluel@test.tld">contact</a></li>
-          <li><a href="login.html">login</a></li>
+          <li><a id="login-link" href="login.html">login</a></li>
           <li><img src="./assets/icons/instagram.png" alt="Instagram" /></li>
         </ul>
       </nav>
@@ -54,7 +54,16 @@
         </article>
       </section>
       <section id="portfolio">
-        <h2>Mes Projets</h2>
+        <div class="portfolio-header">
+          <h2>Mes Projets</h2>
+
+          <!-- Bouton modifier (caché par défaut, affiché si connecté) -->
+          <a href="#" class="edit-projects">
+            <img src="./assets/icons/Vector.svg" alt="modifier" />
+            <span>Modifier</span>
+          </a>
+        </div>
+
         <div class="filters"></div>
         <div class="gallery"></div>
       </section>

@@ -1,7 +1,23 @@
 console.log("JS chargé");
 
 /* =====================================================
-   RÉCUPÉRATION DES ÉLÉMENTS HTML
+   1. VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
+===================================================== */
+
+// On récupère le token stocké lors du login
+const token = localStorage.getItem("token");
+
+// Si token existe → utilisateur connecté
+const isConnected = token !== null;
+
+if (isConnected) {
+  console.log("Utilisateur connecté");
+} else {
+  console.log("Utilisateur NON connecté");
+}
+
+/* =====================================================
+   2. RÉCUPÉRATION DES ÉLÉMENTS HTML
 ===================================================== */
 
 // Galerie des projets (page d’accueil)
@@ -10,47 +26,71 @@ const gallery = document.querySelector(".gallery");
 // Zone des filtres
 const filtersDiv = document.querySelector(".filters");
 
+// Lien login / logout (IMPORTANT : id dans le HTML)
+const loginLink = document.querySelector("#login-link");
+
+// Bandeau "mode édition"
+const editBanner = document.querySelector(".edit-mode");
+
+// Bouton "Modifier" à côté de Mes Projets
+const editProjectsLink = document.querySelector(".edit-projects");
 
 /* =====================================================
-   ÉTAPE 5.3 — VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
+   3. COMPORTEMENT SI UTILISATEUR CONNECTÉ
 ===================================================== */
 
+if (isConnected) {
+  // Afficher le bandeau mode édition
+  if (editBanner) {
+    editBanner.style.display = "flex";
+  }
 
-// On vérifie si un token existe dans le navigateur
-const token = localStorage.getItem("token");
+  // Afficher le bouton "Modifier"
+  if (editProjectsLink) {
+    editProjectsLink.style.display = "flex";
+  }
 
-if (token) {
-  console.log("Utilisateur connecté");
-
-  // Quand on est connecté :
-  // 1. On cache les filtres
+  // Cacher les filtres
   if (filtersDiv) {
     filtersDiv.style.display = "none";
   }
 
-  // 2. Le bouton "login" devient "logout"
-  const loginLi = document.querySelector("nav li:nth-child(3)");
+  // Transformer login → logout
+  if (loginLink) {
+    loginLink.textContent = "logout";
+    loginLink.href = "#";
 
-  if (loginLi) {
-    loginLi.textContent = "logout";
+    loginLink.addEventListener("click", (event) => {
+      event.preventDefault();
 
-    loginLi.addEventListener("click", () => {
-      // Déconnexion
+      // Suppression des infos de connexion
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
 
-      // Retour à la page login
+      // Redirection vers la page login
       window.location.href = "login.html";
     });
+  }
+} else {
+  // Si pas connecté → cacher le bandeau
+  if (editBanner) {
+    editBanner.style.display = "none";
+  }
+
+  // Cacher le bouton "Modifier"
+  if (editProjectsLink) {
+    editProjectsLink.style.display = "none";
   }
 }
 
 /* =====================================================
-   FONCTION : AFFICHER LES TRAVAUX
+   4. FONCTION : AFFICHER LES TRAVAUX
 ===================================================== */
 
 function afficherTravaux(travaux) {
-  // On vide la galerie avant d’afficher autre chose
+  if (!gallery) return;
+
+  // On vide la galerie avant d’afficher
   gallery.innerHTML = "";
 
   travaux.forEach((work) => {
@@ -70,77 +110,77 @@ function afficherTravaux(travaux) {
 }
 
 /* =====================================================
-   FONCTION : METTRE LE BOUTON ACTIF
+   5. FONCTION : BOUTON ACTIF (FILTRES)
 ===================================================== */
 
 function setActiveButton(buttonClique) {
   const buttons = document.querySelectorAll(".filters button");
-
   buttons.forEach((btn) => btn.classList.remove("active"));
   buttonClique.classList.add("active");
 }
 
 /* =====================================================
-   RÉCUPÉRATION DES TRAVAUX (PAGE D’ACCUEIL)
+   6. PAGE D’ACCUEIL : TRAVAUX + FILTRES
 ===================================================== */
 
-fetch("http://localhost:5678/api/works")
-  .then((response) => response.json())
-  .then((works) => {
-    console.log("Travaux reçus :", works);
+if (gallery) {
+  fetch("http://localhost:5678/api/works")
+    .then((response) => response.json())
+    .then((works) => {
+      console.log("Travaux reçus :", works);
 
-    // Affichage de tous les projets au chargement
-    afficherTravaux(works);
+      // Affichage des projets
+      afficherTravaux(works);
 
-    /* -----------------------------------------------
-       RÉCUPÉRATION DES CATÉGORIES
-    ----------------------------------------------- */
+      // Si connecté → PAS de filtres
+      if (isConnected) return;
 
-    fetch("http://localhost:5678/api/categories")
-      .then((response) => response.json())
-      .then((categories) => {
-        console.log("Catégories reçues :", categories);
+      // Sinon → création des filtres
+      fetch("http://localhost:5678/api/categories")
+        .then((response) => response.json())
+        .then((categories) => {
+          console.log("Catégories reçues :", categories);
 
-        // Bouton "Tous"
-        const btnTous = document.createElement("button");
-        btnTous.textContent = "Tous";
-        btnTous.classList.add("active");
-        filtersDiv.appendChild(btnTous);
+          // Bouton Tous
+          const btnTous = document.createElement("button");
+          btnTous.textContent = "Tous";
+          btnTous.classList.add("active");
+          filtersDiv.appendChild(btnTous);
 
-        btnTous.addEventListener("click", () => {
-          setActiveButton(btnTous);
-          afficherTravaux(works);
-        });
+          btnTous.addEventListener("click", () => {
+            setActiveButton(btnTous);
+            afficherTravaux(works);
+          });
 
-        // Boutons des catégories
-        categories.forEach((category) => {
-          const btn = document.createElement("button");
-          btn.textContent = category.name;
-          filtersDiv.appendChild(btn);
+          // Boutons catégories
+          categories.forEach((category) => {
+            const btn = document.createElement("button");
+            btn.textContent = category.name;
+            filtersDiv.appendChild(btn);
 
-          btn.addEventListener("click", () => {
-            setActiveButton(btn);
+            btn.addEventListener("click", () => {
+              setActiveButton(btn);
 
-            // On filtre les travaux selon la catégorie
-            const travauxFiltres = works.filter(
-              (work) => work.categoryId === category.id
-            );
+              const travauxFiltres = works.filter(
+                (work) => work.categoryId === category.id
+              );
 
-            afficherTravaux(travauxFiltres);
+              afficherTravaux(travauxFiltres);
+            });
           });
         });
-      });
-  });
+    });
+}
 
 /* =====================================================
-   PAGE LOGIN — AUTHENTIFICATION
+   7. PAGE LOGIN : AUTHENTIFICATION
 ===================================================== */
 
 const form = document.querySelector("#login-form");
 
 if (form) {
   form.addEventListener("submit", (event) => {
-    event.preventDefault(); // empêche le rechargement de la page
+    event.preventDefault(); // empêche le rechargement
 
     const email = document.querySelector("#email").value;
     const password = document.querySelector("#password").value;
@@ -155,21 +195,19 @@ if (form) {
     })
       .then((response) => response.json())
       .then((data) => {
-        // Si le token existe → connexion réussie
         if (data.token) {
+          // Connexion réussie
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.userId);
 
-          // Redirection vers l’accueil
           window.location.href = "index.html";
         } else {
           document.querySelector("#login-error").textContent =
-            "Erreur : email ou mot de passe incorrect.";
+            "Email ou mot de passe incorrect.";
         }
       })
       .catch(() => {
-        document.querySelector("#login-error").textContent =
-          "Erreur serveur. Réessaie.";
+        document.querySelector("#login-error").textContent = "Erreur serveur.";
       });
   });
 }

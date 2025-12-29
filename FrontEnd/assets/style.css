@@ -360,12 +360,12 @@ footer nav ul {
   cursor: pointer;
 }
 
-/* Bandeau mode édition */
+/* Bandeau mode édition (caché par défaut) */
 .edit-mode {
+  display: none;
   width: 100%;
   height: 59px;
   background-color: #000;
-  display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -381,4 +381,49 @@ footer nav ul {
   font-family: "Work Sans";
   font-size: 16px;
   font-weight: 400;
+}
+
+/* Bouton modifier les projets */
+
+/* Conteneur titre + modifier */
+.portfolio-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px; /* espace entre "Mes Projets" et le groupe Modifier */
+  position: relative;
+  margin-top: 130px;
+}
+
+/* ===== Mode édition : titre Mes projets + bouton Modifier ===== */
+
+.title-edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px; /* espace entre "Mes projets" et le groupe modifier */
+}
+
+/* Groupe crayon + texte */
+.edit-projects {
+  display: none; /* affiché uniquement quand connecté via JS */
+  align-items: center;
+  gap: 10px; /* espace crayon ↔ texte */
+  font-family: "Work Sans";
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Icône crayon */
+.edit-projects img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0); /* force l’icône en noir */
+}
+
+a.edit-projects {
+  margin-bottom: 2em;
 }
