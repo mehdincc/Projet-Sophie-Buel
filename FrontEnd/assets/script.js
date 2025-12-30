@@ -211,46 +211,95 @@ if (form) {
       });
   });
 }
-// ===== MODALE : ouverture / fermeture =====
+/* =====================================================
+   ÉTAPE 6 — MODALE (OUVRIR / FERMER + CHANGER DE VUE)
+   Objectif : 1 seule modale, 2 vues (galerie / formulaire)
+===================================================== */
+
+// Bouton "modifier" (à côté de Mes projets)
+const editProjectsBtn = document.querySelector(".edit-projects");
+
+// Overlay + boîte modale
 const modalOverlay = document.querySelector("#modal-overlay");
 const modal = document.querySelector("#modal");
-const modalClose = document.querySelector("#modal-close");
 
-// Le bouton "modifier" (adapte le sélecteur si besoin)
-const editBtn = document.querySelector("#edit-btn"); // idéal : mettre cet id dans ton HTML
+// Boutons de fermeture / navigation
+const modalCloseBtn = document.querySelector("#modal-close");
+const modalAddBtn = document.querySelector("#modal-add-btn");
+const modalBackBtn = document.querySelector("#modal-back");
 
+// Les 2 vues de la modale
+const modalGalleryView = document.querySelector("#modal-gallery-view");
+const modalFormView = document.querySelector("#modal-form-view");
+
+/* ---------- Fonctions simples ---------- */
+
+// Ouvrir la modale (affiche overlay)
 function openModal() {
-  if (!modalOverlay) return;
-  modalOverlay.style.display = "flex";
+  // On montre l’overlay (et donc la modale au centre)
+  modalOverlay.classList.add("is-open");
+
+  // Par défaut : on arrive sur la vue galerie
+  showGalleryView();
 }
 
+// Fermer la modale
 function closeModal() {
-  if (!modalOverlay) return;
-  modalOverlay.style.display = "none";
+  modalOverlay.classList.remove("is-open");
+
+  // Optionnel : quand on ferme, on revient sur la galerie
+  // (comme ça, quand on ré-ouvre, c’est propre)
+  showGalleryView();
 }
 
-// Ouvrir au clic sur "modifier" (uniquement si connecté)
-if (isConnected && editBtn) {
-  editBtn.addEventListener("click", (event) => {
-    event.preventDefault();
+// Afficher la vue galerie / cacher la vue formulaire
+function showGalleryView() {
+  modalGalleryView.classList.remove("modal-hidden");
+  modalFormView.classList.add("modal-hidden");
+}
+
+// Afficher la vue formulaire / cacher la vue galerie
+function showFormView() {
+  modalGalleryView.classList.add("modal-hidden");
+  modalFormView.classList.remove("modal-hidden");
+}
+
+/* ---------- Événements (clics) ---------- */
+
+// 1) Ouvrir au clic sur "modifier"
+if (editProjectsBtn) {
+  editProjectsBtn.addEventListener("click", () => {
     openModal();
   });
 }
 
-// Fermer avec la croix
-if (modalClose) {
-  modalClose.addEventListener("click", closeModal);
-}
-
-// Fermer en cliquant sur l'overlay (mais pas quand on clique dans la modale)
-if (modalOverlay) {
-  modalOverlay.addEventListener("click", () => {
+// 2) Fermer au clic sur la croix
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener("click", () => {
     closeModal();
   });
 }
 
-if (modal) {
-  modal.addEventListener("click", (event) => {
-    event.stopPropagation();
+// 3) Fermer au clic sur l’overlay (en dehors de la modale)
+if (modalOverlay) {
+  modalOverlay.addEventListener("click", (event) => {
+    // si on clique sur l’overlay (et pas dans la boîte)
+    if (event.target === modalOverlay) {
+      closeModal();
+    }
+  });
+}
+
+// 4) Passer à la vue "Ajout photo"
+if (modalAddBtn) {
+  modalAddBtn.addEventListener("click", () => {
+    showFormView();
+  });
+}
+
+// 5) Revenir à la vue "Galerie"
+if (modalBackBtn) {
+  modalBackBtn.addEventListener("click", () => {
+    showGalleryView();
   });
 }
