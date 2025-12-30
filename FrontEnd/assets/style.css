@@ -431,3 +431,55 @@ footer nav ul {
 .modal-hidden {
   display: none;
 }
+
+/* =========================
+   MODALE - FIX FINAL
+========================= */
+
+/* Overlay plein écran (ne doit PAS être dans le flux normal) */
+.modal-overlay {
+  position: fixed; /* clé: sort du flux */
+  top: 0;
+  left: 0;
+  width: 100vw; /* plein écran */
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: none; /* caché par défaut */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  margin: 0 !important; /* sécurité contre tes styles */
+  padding: 0 !important;
+}
+
+/* Quand on ouvre */
+.modal-overlay.is-open {
+  display: flex;
+}
+
+/* Boîte modale centrée */
+.modal {
+  width: 630px;
+  max-width: calc(100vw - 40px); /* évite de déborder sur petit écran */
+  background: #fff;
+  border-radius: 10px;
+  position: relative;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* Croix */
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* Cache une vue */
+.modal-hidden {
+  display: none;
+}

@@ -1,61 +1,61 @@
 console.log("JS chargé");
 
 /* =====================================================
-   1. VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
+   1) VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
+   -> On regarde si un token existe dans localStorage
 ===================================================== */
 
-// On récupère le token stocké lors du login
 const token = localStorage.getItem("token");
-
-// Si token existe → utilisateur connecté
 const isConnected = token !== null;
 
 if (isConnected) {
-  console.log("Utilisateur connecté");
+  console.log("Utilisateur connecté ✅");
 } else {
-  console.log("Utilisateur NON connecté");
+  console.log("Utilisateur NON connecté ❌");
 }
 
 /* =====================================================
-   2. RÉCUPÉRATION DES ÉLÉMENTS HTML
+   2) RÉCUPÉRATION DES ÉLÉMENTS HTML (peuvent être absents)
 ===================================================== */
 
-// Galerie des projets (page d’accueil)
+// Page accueil
 const gallery = document.querySelector(".gallery");
-
-// Zone des filtres
 const filtersDiv = document.querySelector(".filters");
 
-// Lien login / logout (IMPORTANT : id dans le HTML)
+// Header / nav
 const loginLink = document.querySelector("#login-link");
 
 // Bandeau "mode édition"
 const editBanner = document.querySelector(".edit-mode");
 
-// Bouton "Modifier" à côté de Mes Projets
-const editProjectsLink = document.querySelector(".edit-projects");
+// Bouton "modifier" à côté de "Mes projets"
+const editProjectsBtn = document.querySelector(".edit-projects");
 
 /* =====================================================
-   3. COMPORTEMENT SI UTILISATEUR CONNECTÉ
+   3) MODE ÉDITION (UNIQUEMENT SI CONNECTÉ)
+   - Afficher bandeau
+   - Cacher filtres
+   - Login => Logout + déconnexion
+   - Afficher "modifier"
 ===================================================== */
 
 if (isConnected) {
-  // Afficher le bandeau mode édition
+  // 1) Bandeau
   if (editBanner) {
     editBanner.style.display = "flex";
   }
 
-  // Afficher le bouton "Modifier"
-  if (editProjectsLink) {
-    editProjectsLink.style.display = "flex";
-  }
-
-  // Cacher les filtres
+  // 2) Cacher filtres
   if (filtersDiv) {
     filtersDiv.style.display = "none";
   }
 
-  // Transformer login → logout
+  // 3) Afficher le bouton "modifier"
+  if (editProjectsBtn) {
+    editProjectsBtn.style.display = "flex";
+  }
+
+  // 4) Login => Logout
   if (loginLink) {
     loginLink.textContent = "logout";
     loginLink.href = "#";
@@ -63,34 +63,29 @@ if (isConnected) {
     loginLink.addEventListener("click", (event) => {
       event.preventDefault();
 
-      // Suppression des infos de connexion
+      // Supprimer token / userId
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
 
-      // Redirection vers la page login
+      // Retour login
       window.location.href = "login.html";
     });
   }
 } else {
-  // Si pas connecté → cacher le bandeau
+  // Si pas connecté : bandeau caché
   if (editBanner) {
     editBanner.style.display = "none";
-  }
-
-  // Cacher le bouton "Modifier"
-  if (editProjectsLink) {
-    editProjectsLink.style.display = "none";
   }
 }
 
 /* =====================================================
-   4. FONCTION : AFFICHER LES TRAVAUX
+   4) FONCTION : AFFICHER LES TRAVAUX
 ===================================================== */
 
 function afficherTravaux(travaux) {
   if (!gallery) return;
 
-  // On vide la galerie avant d’afficher
+  // On vide la galerie avant de réafficher
   gallery.innerHTML = "";
 
   travaux.forEach((work) => {
@@ -110,7 +105,7 @@ function afficherTravaux(travaux) {
 }
 
 /* =====================================================
-   5. FONCTION : BOUTON ACTIF (FILTRES)
+   5) FONCTION : BOUTON ACTIF (FILTRES)
 ===================================================== */
 
 function setActiveButton(buttonClique) {
@@ -120,7 +115,9 @@ function setActiveButton(buttonClique) {
 }
 
 /* =====================================================
-   6. PAGE D’ACCUEIL : TRAVAUX + FILTRES
+   6) PAGE ACCUEIL : WORKS + FILTRES
+   - Works : toujours
+   - Filtres : seulement si pas connecté
 ===================================================== */
 
 if (gallery) {
@@ -129,19 +126,19 @@ if (gallery) {
     .then((works) => {
       console.log("Travaux reçus :", works);
 
-      // Affichage des projets
+      // Affichage de tous les projets
       afficherTravaux(works);
 
-      // Si connecté → PAS de filtres
+      // Si connecté => on ne crée pas les filtres
       if (isConnected) return;
 
-      // Sinon → création des filtres
+      // Sinon => on crée les filtres
       fetch("http://localhost:5678/api/categories")
         .then((response) => response.json())
         .then((categories) => {
           console.log("Catégories reçues :", categories);
 
-          // Bouton Tous
+          // Bouton "Tous"
           const btnTous = document.createElement("button");
           btnTous.textContent = "Tous";
           btnTous.classList.add("active");
@@ -169,11 +166,14 @@ if (gallery) {
             });
           });
         });
+    })
+    .catch((error) => {
+      console.log("Erreur fetch works/categories :", error);
     });
 }
 
 /* =====================================================
-   7. PAGE LOGIN : AUTHENTIFICATION
+   7) PAGE LOGIN : AUTHENTIFICATION
 ===================================================== */
 
 const form = document.querySelector("#login-form");
@@ -188,18 +188,16 @@ if (form) {
     fetch("http://localhost:5678/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-      }),
+      body: JSON.stringify({ email: email, password: password }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.token) {
-          // Connexion réussie
+          // Connexion OK
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.userId);
 
+          // Retour accueil
           window.location.href = "index.html";
         } else {
           document.querySelector("#login-error").textContent =
@@ -207,17 +205,15 @@ if (form) {
         }
       })
       .catch(() => {
-        document.querySelector("#login-error").textContent = "Erreur serveur.";
+        document.querySelector("#login-error").textContent =
+          "Erreur serveur. Réessaie.";
       });
   });
 }
-/* =====================================================
-   ÉTAPE 6 — MODALE (OUVRIR / FERMER + CHANGER DE VUE)
-   Objectif : 1 seule modale, 2 vues (galerie / formulaire)
-===================================================== */
 
-// Bouton "modifier" (à côté de Mes projets)
-const editProjectsBtn = document.querySelector(".edit-projects");
+/* =====================================================
+   8) ÉTAPE 6 — MODALE (OUVRIR / FERMER + CHANGER DE VUE)
+===================================================== */
 
 // Overlay + boîte modale
 const modalOverlay = document.querySelector("#modal-overlay");
@@ -232,43 +228,46 @@ const modalBackBtn = document.querySelector("#modal-back");
 const modalGalleryView = document.querySelector("#modal-gallery-view");
 const modalFormView = document.querySelector("#modal-form-view");
 
-/* ---------- Fonctions simples ---------- */
-
-// Ouvrir la modale (affiche overlay)
+// Ouvrir la modale
 function openModal() {
-  // On montre l’overlay (et donc la modale au centre)
+  if (!modalOverlay) return;
+
   modalOverlay.classList.add("is-open");
 
-  // Par défaut : on arrive sur la vue galerie
+  // Quand on ouvre : on revient toujours sur la galerie
   showGalleryView();
 }
 
 // Fermer la modale
 function closeModal() {
+  if (!modalOverlay) return;
+
   modalOverlay.classList.remove("is-open");
 
-  // Optionnel : quand on ferme, on revient sur la galerie
-  // (comme ça, quand on ré-ouvre, c’est propre)
+  // Quand on ferme : on remet la galerie (propre pour la prochaine ouverture)
   showGalleryView();
 }
 
-// Afficher la vue galerie / cacher la vue formulaire
+// Afficher galerie / cacher formulaire
 function showGalleryView() {
+  if (!modalGalleryView || !modalFormView) return;
+
   modalGalleryView.classList.remove("modal-hidden");
   modalFormView.classList.add("modal-hidden");
 }
 
-// Afficher la vue formulaire / cacher la vue galerie
+// Afficher formulaire / cacher galerie
 function showFormView() {
+  if (!modalGalleryView || !modalFormView) return;
+
   modalGalleryView.classList.add("modal-hidden");
   modalFormView.classList.remove("modal-hidden");
 }
 
-/* ---------- Événements (clics) ---------- */
-
-// 1) Ouvrir au clic sur "modifier"
-if (editProjectsBtn) {
+// 1) Ouvrir au clic sur "modifier" (seulement si connecté)
+if (isConnected && editProjectsBtn) {
   editProjectsBtn.addEventListener("click", () => {
+    console.log("Clic sur modifier => ouverture modale ✅");
     openModal();
   });
 }
@@ -283,7 +282,6 @@ if (modalCloseBtn) {
 // 3) Fermer au clic sur l’overlay (en dehors de la modale)
 if (modalOverlay) {
   modalOverlay.addEventListener("click", (event) => {
-    // si on clique sur l’overlay (et pas dans la boîte)
     if (event.target === modalOverlay) {
       closeModal();
     }
