@@ -2,94 +2,65 @@ console.log("JS chargé");
 
 /* =====================================================
    1) VÉRIFIER SI L’UTILISATEUR EST CONNECTÉ
-   -> On regarde si un token existe dans localStorage
 ===================================================== */
 
+// On lit le token (pour savoir si connecté)
 const token = localStorage.getItem("token");
 const isConnected = token !== null;
 
-if (isConnected) {
-  console.log("Utilisateur connecté ✅");
-} else {
-  console.log("Utilisateur NON connecté ❌");
-}
+console.log(isConnected ? "Utilisateur connecté ✅" : "Utilisateur NON connecté ❌");
 
 /* =====================================================
-   2) RÉCUPÉRATION DES ÉLÉMENTS HTML (peuvent être absents)
+   2) RÉCUPÉRATION DES ÉLÉMENTS HTML
 ===================================================== */
 
-// Page accueil
+// Galerie principale
 const gallery = document.querySelector(".gallery");
 const filtersDiv = document.querySelector(".filters");
 
 // Header / nav
 const loginLink = document.querySelector("#login-link");
 
-// Bandeau "mode édition"
+// Mode édition
 const editBanner = document.querySelector(".edit-mode");
-
-// Bouton "modifier" à côté de "Mes projets"
 const editProjectsBtn = document.querySelector(".edit-projects");
 
 /* =====================================================
-   3) MODE ÉDITION (UNIQUEMENT SI CONNECTÉ)
-   - Afficher bandeau
-   - Cacher filtres
-   - Login => Logout + déconnexion
-   - Afficher "modifier"
+   3) MODE ÉDITION (SI CONNECTÉ)
 ===================================================== */
 
 if (isConnected) {
-  // 1) Bandeau
-  if (editBanner) {
-    editBanner.style.display = "flex";
-  }
+  if (editBanner) editBanner.style.display = "flex";
+  if (filtersDiv) filtersDiv.style.display = "none";
+  if (editProjectsBtn) editProjectsBtn.style.display = "flex";
 
-  // 2) Cacher filtres
-  if (filtersDiv) {
-    filtersDiv.style.display = "none";
-  }
-
-  // 3) Afficher le bouton "modifier"
-  if (editProjectsBtn) {
-    editProjectsBtn.style.display = "flex";
-  }
-
-  // 4) Login => Logout
   if (loginLink) {
     loginLink.textContent = "logout";
     loginLink.href = "#";
 
-    loginLink.addEventListener("click", (event) => {
-      event.preventDefault();
-
-      // Supprimer token / userId
+    loginLink.addEventListener("click", (e) => {
+      e.preventDefault();
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
-
-      // Retour login
       window.location.href = "login.html";
     });
   }
 } else {
-  // Si pas connecté : bandeau caché
-  if (editBanner) {
-    editBanner.style.display = "none";
-  }
+  if (editBanner) editBanner.style.display = "none";
 }
 
 /* =====================================================
-   4) FONCTION : AFFICHER LES TRAVAUX
+   4) AFFICHER LES TRAVAUX (GALERIE PRINCIPALE)
 ===================================================== */
 
 function afficherTravaux(travaux) {
   if (!gallery) return;
 
-  // On vide la galerie avant de réafficher
   gallery.innerHTML = "";
 
   travaux.forEach((work) => {
     const figure = document.createElement("figure");
+    figure.dataset.id = work.id;
 
     const img = document.createElement("img");
     img.src = work.imageUrl;
@@ -105,40 +76,36 @@ function afficherTravaux(travaux) {
 }
 
 /* =====================================================
-   5) FONCTION : BOUTON ACTIF (FILTRES)
+   5) FILTRES (UTILISATEUR NON CONNECTÉ)
 ===================================================== */
 
-function setActiveButton(buttonClique) {
-  const buttons = document.querySelectorAll(".filters button");
-  buttons.forEach((btn) => btn.classList.remove("active"));
-  buttonClique.classList.add("active");
+function setActiveButton(activeBtn) {
+  document.querySelectorAll(".filters button").forEach((btn) =>
+    btn.classList.remove("active")
+  );
+  activeBtn.classList.add("active");
 }
 
 /* =====================================================
-   6) PAGE ACCUEIL : WORKS + FILTRES
-   - Works : toujours
-   - Filtres : seulement si pas connecté
+   6) CHARGEMENT DES WORKS + FILTRES
 ===================================================== */
+
+let cachedWorks = [];
 
 if (gallery) {
   fetch("http://localhost:5678/api/works")
-    .then((response) => response.json())
+    .then((res) => res.json())
     .then((works) => {
-      console.log("Travaux reçus :", works);
-
-      // Affichage de tous les projets
+      cachedWorks = works;
       afficherTravaux(works);
 
-      // Si connecté => on ne crée pas les filtres
+      // Si connecté : pas de filtres
       if (isConnected) return;
 
-      // Sinon => on crée les filtres
+      // Sinon : filtres
       fetch("http://localhost:5678/api/categories")
-        .then((response) => response.json())
+        .then((res) => res.json())
         .then((categories) => {
-          console.log("Catégories reçues :", categories);
-
-          // Bouton "Tous"
           const btnTous = document.createElement("button");
           btnTous.textContent = "Tous";
           btnTous.classList.add("active");
@@ -149,38 +116,30 @@ if (gallery) {
             afficherTravaux(works);
           });
 
-          // Boutons catégories
-          categories.forEach((category) => {
+          categories.forEach((cat) => {
             const btn = document.createElement("button");
-            btn.textContent = category.name;
+            btn.textContent = cat.name;
             filtersDiv.appendChild(btn);
 
             btn.addEventListener("click", () => {
               setActiveButton(btn);
-
-              const travauxFiltres = works.filter(
-                (work) => work.categoryId === category.id
-              );
-
-              afficherTravaux(travauxFiltres);
+              afficherTravaux(works.filter((w) => w.categoryId === cat.id));
             });
           });
         });
     })
-    .catch((error) => {
-      console.log("Erreur fetch works/categories :", error);
-    });
+    .catch((err) => console.error("Erreur fetch works :", err));
 }
 
 /* =====================================================
-   7) PAGE LOGIN : AUTHENTIFICATION
+   7) LOGIN
 ===================================================== */
 
 const form = document.querySelector("#login-form");
 
 if (form) {
-  form.addEventListener("submit", (event) => {
-    event.preventDefault(); // empêche le rechargement
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
     const email = document.querySelector("#email").value;
     const password = document.querySelector("#password").value;
@@ -188,16 +147,13 @@ if (form) {
     fetch("http://localhost:5678/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password }),
+      body: JSON.stringify({ email, password }),
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
         if (data.token) {
-          // Connexion OK
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.userId);
-
-          // Retour accueil
           window.location.href = "index.html";
         } else {
           document.querySelector("#login-error").textContent =
@@ -205,50 +161,39 @@ if (form) {
         }
       })
       .catch(() => {
-        document.querySelector("#login-error").textContent =
-          "Erreur serveur. Réessaie.";
+        document.querySelector("#login-error").textContent = "Erreur serveur.";
       });
   });
 }
 
 /* =====================================================
-   8) ÉTAPE 6 — MODALE (OUVRIR / FERMER + CHANGER DE VUE)
+   8) MODALE — OUVERTURE / FERMETURE / NAVIGATION
 ===================================================== */
 
-// Overlay + boîte modale
 const modalOverlay = document.querySelector("#modal-overlay");
-const modal = document.querySelector("#modal");
-
-// Boutons de fermeture / navigation
 const modalCloseBtn = document.querySelector("#modal-close");
 const modalAddBtn = document.querySelector("#modal-add-btn");
 const modalBackBtn = document.querySelector("#modal-back");
 
-// Les 2 vues de la modale
 const modalGalleryView = document.querySelector("#modal-gallery-view");
 const modalFormView = document.querySelector("#modal-form-view");
+const modalGallery = document.querySelector("#modal-gallery");
 
-// Ouvrir la modale
 function openModal() {
   if (!modalOverlay) return;
 
   modalOverlay.classList.add("is-open");
-
-  // Quand on ouvre : on revient toujours sur la galerie
   showGalleryView();
+  loadModalWorks();
 }
 
-// Fermer la modale
 function closeModal() {
   if (!modalOverlay) return;
 
   modalOverlay.classList.remove("is-open");
-
-  // Quand on ferme : on remet la galerie (propre pour la prochaine ouverture)
   showGalleryView();
 }
 
-// Afficher galerie / cacher formulaire
 function showGalleryView() {
   if (!modalGalleryView || !modalFormView) return;
 
@@ -256,7 +201,6 @@ function showGalleryView() {
   modalFormView.classList.add("modal-hidden");
 }
 
-// Afficher formulaire / cacher galerie
 function showFormView() {
   if (!modalGalleryView || !modalFormView) return;
 
@@ -264,40 +208,113 @@ function showFormView() {
   modalFormView.classList.remove("modal-hidden");
 }
 
-// 1) Ouvrir au clic sur "modifier" (seulement si connecté)
 if (isConnected && editProjectsBtn) {
-  editProjectsBtn.addEventListener("click", () => {
-    console.log("Clic sur modifier => ouverture modale ✅");
-    openModal();
-  });
+  editProjectsBtn.addEventListener("click", openModal);
 }
 
-// 2) Fermer au clic sur la croix
-if (modalCloseBtn) {
-  modalCloseBtn.addEventListener("click", () => {
-    closeModal();
-  });
-}
+if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeModal);
 
-// 3) Fermer au clic sur l’overlay (en dehors de la modale)
 if (modalOverlay) {
-  modalOverlay.addEventListener("click", (event) => {
-    if (event.target === modalOverlay) {
-      closeModal();
-    }
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
   });
 }
 
-// 4) Passer à la vue "Ajout photo"
-if (modalAddBtn) {
-  modalAddBtn.addEventListener("click", () => {
-    showFormView();
+if (modalAddBtn) modalAddBtn.addEventListener("click", showFormView);
+if (modalBackBtn) modalBackBtn.addEventListener("click", showGalleryView);
+
+/* =====================================================
+   9) MODALE — MINIATURES + SUPPRESSION (DELETE)
+===================================================== */
+
+// Affiche les miniatures dans la modale
+function renderModalWorks(works) {
+  if (!modalGallery) return;
+
+  modalGallery.innerHTML = "";
+
+  works.forEach((work) => {
+    const figure = document.createElement("figure");
+    figure.classList.add("modal-thumb");
+
+    const img = document.createElement("img");
+    img.src = work.imageUrl;
+    img.alt = work.title;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete-work-btn");
+    deleteBtn.dataset.id = work.id;
+
+    const trashIcon = document.createElement("img");
+    trashIcon.src = "./assets/icons/trash-can-solid.svg";
+    trashIcon.alt = "Supprimer";
+
+    deleteBtn.appendChild(trashIcon);
+
+    deleteBtn.addEventListener("click", () => {
+      deleteWork(work.id, figure);
+    });
+
+    figure.appendChild(img);
+    figure.appendChild(deleteBtn);
+    modalGallery.appendChild(figure);
   });
 }
 
-// 5) Revenir à la vue "Galerie"
-if (modalBackBtn) {
-  modalBackBtn.addEventListener("click", () => {
-    showGalleryView();
-  });
+// Charge les works dans la modale
+function loadModalWorks() {
+  // si cachedWorks déjà chargé => on l’utilise
+  if (cachedWorks.length > 0) {
+    renderModalWorks(cachedWorks);
+    return;
+  }
+
+  // sinon on refetch (au cas où modale ouverte trop vite)
+  fetch("http://localhost:5678/api/works")
+    .then((res) => res.json())
+    .then((works) => {
+      cachedWorks = works;
+      renderModalWorks(works);
+    })
+    .catch(() => alert("Erreur chargement des travaux dans la modale."));
+}
+
+// ✅ DELETE : on relit le token AU MOMENT DU CLIC
+function deleteWork(id, figureElement) {
+  const token = localStorage.getItem("token"); // ✅ important pour éviter 401
+
+  if (!token) {
+    alert("Token manquant. Reconnecte-toi.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  fetch(`http://localhost:5678/api/works/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => {
+      if (res.status === 204) {
+        // 1) retirer de la modale
+        if (figureElement) figureElement.remove();
+
+        // 2) retirer de la galerie principale
+        if (gallery) {
+          const mainFigure = gallery.querySelector(`figure[data-id="${id}"]`);
+          if (mainFigure) mainFigure.remove();
+        }
+
+        // 3) retirer du cache
+        cachedWorks = cachedWorks.filter((w) => w.id !== id);
+
+        console.log(`Work ${id} supprimé ✅`);
+      } else if (res.status === 401) {
+        alert("401 Unauthorized : token invalide/expiré. Reconnecte-toi.");
+      } else {
+        alert("Erreur suppression.");
+      }
+    })
+    .catch(() => alert("Erreur serveur pendant la suppression."));
 }

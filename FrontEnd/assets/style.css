@@ -435,51 +435,132 @@ footer nav ul {
 /* =========================
    MODALE - FIX FINAL
 ========================= */
+/* =====================================================
+   MODALE — STYLE FIGMA (630x688 + overlay 30%)
+===================================================== */
 
-/* Overlay plein écran (ne doit PAS être dans le flux normal) */
+/* Overlay (fond noir transparent) */
 .modal-overlay {
-  position: fixed; /* clé: sort du flux */
-  top: 0;
-  left: 0;
-  width: 100vw; /* plein écran */
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
+  position: fixed;
+  inset: 0;
+  background: #0000004d; /* noir à ~30% */
   display: none; /* caché par défaut */
   justify-content: center;
   align-items: center;
-  z-index: 9999;
-  margin: 0 !important; /* sécurité contre tes styles */
-  padding: 0 !important;
+  z-index: 999;
 }
 
-/* Quand on ouvre */
+/* Quand on ouvre la modale (ta classe JS) */
 .modal-overlay.is-open {
   display: flex;
 }
 
-/* Boîte modale centrée */
+/* Boîte modale */
 .modal {
   width: 630px;
-  max-width: calc(100vw - 40px); /* évite de déborder sur petit écran */
+  height: 688px;
   background: #fff;
   border-radius: 10px;
   position: relative;
-  padding: 30px;
   box-sizing: border-box;
+  padding: 0; /* on gère les espacements section par section */
 }
 
 /* Croix */
 .modal-close {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 26px;
+  right: 30px;
   background: transparent;
   border: none;
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
 }
 
-/* Cache une vue */
+/* Titres (Galerie photo / Ajout photo) */
+.modal-title {
+  text-align: center;
+  margin-top: 60px; /* 60px du haut */
+  margin-bottom: 45px; /* 45px avant les miniatures */
+  font-family: "Work Sans";
+  font-style: regular;
+  font-weight: 400;
+  font-size: 26px;
+  color: #000;
+}
+
+/* Zone galerie miniatures */
+.modal-gallery {
+  width: 420px; /* 5 colonnes * 76.86 + 4 gaps * 10 ≈ 424.3 -> on ajuste */
+  margin: 0 auto; /* centré */
+  display: grid;
+  grid-template-columns: repeat(5, 76.86px); /* 5 par ligne */
+  column-gap: 10px; /* espace entre images */
+  row-gap: 35px; /* espace entre lignes */
+  justify-content: center;
+}
+
+/* Chaque miniature (figure) */
+.modal-thumb {
+  position: relative;
+  width: 76.86px;
+  height: 102.57px;
+}
+
+/* Image de la miniature */
+.modal-thumb img {
+  width: 76.86px;
+  height: 102.57px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Bouton poubelle (carré noir 17x17) */
+.delete-work-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 17px;
+  height: 17px;
+  border-radius: 2px;
+  background: #000;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Icône poubelle à l’intérieur */
+.delete-work-btn img {
+  width: 9px;
+  height: 11px;
+  object-fit: contain;
+}
+
+.modal-separator {
+  width: 420px;
+  border-top: 1px solid #b3b3b3;
+  margin: 45px auto 0px auto;
+}
+
+/* Ligne horizontale + bouton ajouter */
+.modal-add-btn {
+  display: block;
+  margin: 35px auto 0 auto;
+  width: 237px;
+  height: 36px;
+  border-radius: 60px;
+  border: none;
+  background: #1d6154;
+  color: #fff;
+  font-family: "Syne";
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Si tu utilises modal-hidden pour cacher une vue */
 .modal-hidden {
   display: none;
 }
